@@ -4,8 +4,6 @@ Forked from [eternal-flame-AD/go-wiringpi](https://github.com/eternal-flame-AD/g
 
 [![GoDoc](https://godoc.org/github.com/TohaUA/go-wiringpi?status.svg)](https://godoc.org/github.com/TohaUA/go-wiringpi)
 
-[WiringPi](http://wiringpi.com/) bindings for golang.
-
 Tweaked for supporting Orange Pi 5 with [wiringOP](https://github.com/orangepi-xunlong/wiringOP)
 
 ## Features & TODOs
