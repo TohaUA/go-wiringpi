@@ -1,8 +1,20 @@
 package wiringpi
 
 // #cgo LDFLAGS: -lwiringPi
-// #include <wiringPi.h>
+/*
+#include <stdio.h>
+#include <stdlib.h>
+#include <wiringPi.h>
+
+// Proxy function to call Go callback
+extern void goCallbackProxy();
+__attribute__((weak))
+void proxyForGoCallback() {
+   goCallbackProxy();
+}
+*/
 import "C"
+import "fmt"
 
 var loaded = false
 
@@ -65,13 +77,13 @@ func (c *GPIO) DigitalWrite(pin int, val DigitalValue) {
 
 // PWMSetRange set PWM generator range
 // defaults to 1024
-func (c *GPIO) PWMSetRange(val uint) {
-	C.pwmSetRange(C.uint(val))
+func (c *GPIO) PWMSetRange(pin int, val uint) {
+	C.pwmSetRange(C.int(pin), C.uint(val))
 }
 
 // PWMSetClock sets the divisor of PWM clock
-func (c *GPIO) PWMSetClock(val int) {
-	C.pwmSetClock(C.int(val))
+func (c *GPIO) PWMSetClock(pin int, val int) {
+	C.pwmSetClock(C.int(pin), C.int(val))
 }
 
 // PWMWrite writes pwn value
@@ -82,6 +94,30 @@ func (c *GPIO) PWMWrite(pin int, val int) {
 // DigitalRead reads digital value
 func (c *GPIO) DigitalRead(pin int) DigitalValue {
 	return DigitalValue(C.digitalRead(C.int(pin)))
+}
+
+// goISRCallback is a global variable to store Go ISR callback
+var goISRCallback func()
+
+//export goCallbackProxy is a proxy function to call Go callback
+func goCallbackProxy() {
+	fmt.Printf("ISR callback\n")
+	if goISRCallback != nil {
+		goISRCallback()
+		goISRCallback = nil
+	}
+}
+
+// WiringPiISR sets up an interrupt service routine
+func (c *GPIO) WiringPiISR(pin int, mode int, callback func()) {
+	// Store Go callback in global variable
+	goISRCallback = callback
+
+	// Setup ISR
+	res := C.wiringPiISR(C.int(pin), C.int(mode), (*[0]byte)(C.proxyForGoCallback))
+	if res != 0 {
+		fmt.Println("Failed to setup ISR")
+	}
 }
 
 // Setup setup the GPIO interface
