@@ -99,7 +99,9 @@ func (c *GPIO) DigitalRead(pin int) DigitalValue {
 // goISRCallback is a global variable to store Go ISR callback
 var goISRCallback func()
 
-//export goCallbackProxy is a proxy function to call Go callback
+// goCallbackProxy is a proxy function to call Go callback
+//
+//export goCallbackProxy
 func goCallbackProxy() {
 	fmt.Printf("ISR callback\n")
 	if goISRCallback != nil {
